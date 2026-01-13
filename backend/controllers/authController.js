@@ -54,8 +54,7 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     // 2. Check if user exists
-    // We explicitly select the password because it might be set to select: false in the model
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email });
     
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
@@ -83,7 +82,7 @@ export const login = async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error); // Good practice to log the actual error on the server
+    console.error(error);
     res.status(500).json({ message: 'Server error during login' });
   }
 };
