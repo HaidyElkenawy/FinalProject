@@ -6,7 +6,7 @@ import authRoutes from './routes/authRoutes.js';
 import postRoutes from './routes/postRoutes.js';
 
 import path from 'path';
-
+import { fileURLToPath } from 'url';
 
 dotenv.config();
 

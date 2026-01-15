@@ -1,18 +1,19 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import API from '../../api/axios'; 
 import { 
-  likePost, 
-  addComment, 
-  deletePost, 
-  updatePost, 
-  deleteComment 
-} from '../../store/slices/postSlice';
+  updatePostLikes, 
+  updatePostComments, 
+  removePost, 
+  updatePostInState 
+} from '../../store/slices/postSlice'; 
 import './PostCard.css';
 
 const PostCard = ({ post }) => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   
+  // Local UI State
   const [commentText, setCommentText] = useState('');
   const [showComments, setShowComments] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -21,44 +22,83 @@ const PostCard = ({ post }) => {
   const isLiked = post.likes.includes(user?.id);
   const isOwner = post.userId?._id === user?.id;
 
-  const handleLike = () => {
-    dispatch(likePost(post._id));
+  const handleLike = async () => {
+    try {
+      const { data } = await API.patch(`/posts/${post._id}/like`);
+      dispatch(updatePostLikes(data));
+    } catch (err) {
+      console.error("Failed to like post", err);
+    }
   };
 
-  const handleComment = (e) => {
+  const handleComment = async (e) => {
     e.preventDefault();
     if (!commentText.trim()) return;
-    dispatch(addComment({ postId: post._id, text: commentText }));
-    setCommentText('');
-  };
 
-  const handleDeleteComment = (commentId) => {
-    if (window.confirm("Delete this comment?")) {
-      dispatch(deleteComment({ postId: post._id, commentId }));
+    try {
+      const { data } = await API.post(`/posts/${post._id}/comment`, { text: commentText });
+      dispatch(updatePostComments({ postId: post._id, comments: data }));
+      setCommentText('');
+    } catch (err) {
+      console.error("Failed to add comment", err);
+    }
+  };
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm("Delete this comment?")) return;
+
+    try {
+      const { data } = await API.delete(`/posts/${post._id}/comment/${commentId}`);
+      dispatch(updatePostComments({ postId: post._id, comments: data }));
+    } catch (err) {
+      console.error("Failed to delete comment", err);
     }
   };
 
-  const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this post?")) {
-      dispatch(deletePost(post._id));
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this post?")) return;
+
+    try {
+      await API.delete(`/posts/${post._id}`);
+      dispatch(removePost(post._id));
+    } catch (err) {
+      console.error("Failed to delete post", err);
     }
   };
 
-  const handleUpdate = () => {
-    if (editDesc.trim() !== post.desc) {
-      dispatch(updatePost({ postId: post._id, desc: editDesc }));
+  const handleUpdate = async () => {
+    if (editDesc.trim() === post.desc) {
+      setIsEditing(false);
+      return;
     }
-    setIsEditing(false);
+
+    try {
+      const { data } = await API.patch(`/posts/${post._id}`, { desc: editDesc });
+      dispatch(updatePostInState(data));
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Failed to update post", err);
+    }
   };
+
+  const getProfileUrl = (user) => {
+  if (!user || !user.profilePicture) {
+    return "https://cdn-icons-png.flaticon.com/512/149/149071.png"; // Default
+  }
+  
+ 
+  const cleanPath = user.profilePicture.replace(/\\/g, "/");
+  return `http://localhost:5000/${cleanPath}`;
+};
 
   return (
     <div className="post-card">
       <div className="post-header">
         <div className="user-info">
           <img 
-            src={post.userId?.profilePicture ? `http://localhost:5000/${post.userId.profilePicture}` : "https://via.placeholder.com/40"} 
+            src={getProfileUrl(post.userId)} 
             alt="User" 
-            className="post-avatar" 
+            className="post-avatar"
+            onError={(e) => { e.target.src = "https://cdn-icons-png.flaticon.com/512/149/149071.png"; }}
           />
           <div>
             <span className="username">{post.userId?.username || "Unknown User"}</span>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { createPost } from '../../store/slices/postSlice';
+import API from '../../api/axios'; 
+import { addPost } from '../../store/slices/postSlice'; 
 import './CreatePost.css';
 
 const CreatePost = () => {
@@ -9,7 +10,7 @@ const CreatePost = () => {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!desc && !image) return;
 
@@ -19,16 +20,28 @@ const CreatePost = () => {
       formData.append('picture', image);
     }
 
-    dispatch(createPost(formData));
-    setDesc('');
-    setImage(null);
+    try {
+      const config = { headers: { 'Content-Type': 'multipart/form-data' } };
+      const { data } = await API.post('/posts', formData, config);
+      dispatch(addPost(data));
+      setDesc('');
+      setImage(null);
+    } catch (error) {
+      console.error("Failed to create post:", error);
+    }
   };
 
+
+  const getProfileUrl = (user) => {
+  if (!user || !user.profilePicture) return "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+  const cleanPath = user.profilePicture.replace(/\\/g, "/");
+  return `http://localhost:5000/${cleanPath}`;
+};
   return (
     <div className="create-post-container">
       <div className="create-post-header">
         <img 
-          src={user?.profilePicture ? `http://localhost:5000/${user.profilePicture}` : "https://via.placeholder.com/50"} 
+          src={getProfileUrl(user)} 
           alt="Profile" 
           className="avatar" 
         />
