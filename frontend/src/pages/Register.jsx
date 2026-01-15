@@ -1,112 +1,82 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, Link } from 'react-router-dom';
-import { registerUser, clearError } from '../store/slices/authSlice';
-import './Register.css';
+import { useNavigate } from 'react-router-dom';
+import API from '../api/axios';
+import { authStart, authSuccess, authFailure } from '../store/slices/authSlice';
+import './Login.css';
 
 const Register = () => {
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    profilePicture: null,
-  });
-
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error, user } = useSelector((state) => state.auth);
+  const { loading, error } = useSelector((state) => state.auth);
 
-  useEffect(() => {
-    return () => {
-      dispatch(clearError());
-    };
-  }, [user, navigate, dispatch]);
-
-  const handleChange = (e) => {
-    if (e.target.name === 'profilePicture') {
-      setFormData({ ...formData, profilePicture: e.target.files[0] });
-    } else {
-      setFormData({ ...formData, [e.target.name]: e.target.value });
-    }
-  };
-
-  const handleSubmit = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    
-    const data = new FormData();
-    data.append('username', formData.username);
-    data.append('email', formData.email);
-    data.append('password', formData.password);
-    if (formData.profilePicture) {
-      data.append('profilePicture', formData.profilePicture);
-    }
+    dispatch(authStart());
 
-    dispatch(registerUser(data));
+    try {
+      const { data } = await API.post('/auth/register', {
+        username,
+        email,
+        password,
+      });
+
+      // Save to LocalStorage
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      dispatch(authSuccess(data));
+      navigate('/login');
+    } catch (err) {
+      dispatch(authFailure(err.response?.data?.message || 'Registration failed'));
+    }
   };
 
   return (
     <div className="register-container">
       <div className="register-card">
         <h2>Create Account</h2>
-        <p className="subtitle">Join our social platform today</p>
+        <p className="subtitle">Join our community today</p>
         
-        {error && <div className="error-message">{error}</div>}
-
-        <form onSubmit={handleSubmit}>
+        {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
+        
+        <form onSubmit={handleRegister}>
           <div className="form-group">
             <label>Username</label>
-            <input
-              type="text"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              required
-              placeholder="Choose a username"
+            <input 
+              type="text" 
+              value={username} 
+              onChange={(e) => setUsername(e.target.value)} 
+              required 
             />
           </div>
-
           <div className="form-group">
-            <label>Email Address</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              placeholder="Enter your email"
+            <label>Email</label>
+            <input 
+              type="email" 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)} 
+              required 
             />
           </div>
-
           <div className="form-group">
             <label>Password</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              minLength="6"
-              placeholder="Create a password"
+            <input 
+              type="password" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)} 
+              required 
             />
           </div>
-
-          <div className="form-group">
-            <label>Profile Picture (Optional)</label>
-            <input
-              type="file"
-              name="profilePicture"
-              accept="image/*"
-              onChange={handleChange}
-            />
-          </div>
-
           <button type="submit" className="auth-btn" disabled={loading}>
-            {loading ? 'Creating Account...' : 'Sign Up'}
+            {loading ? 'Creating Account...' : 'Register'}
           </button>
         </form>
-
         <p className="redirect-text">
-          Already have an account? <Link to="/login">Login here</Link>
+          Already have an account? <a href="/login">Login</a>
         </p>
       </div>
     </div>
