@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import authRoutes from './routes/authRoutes.js';
+import postRoutes from './routes/postRoutes.js';
 
 import path from 'path';
 
@@ -19,6 +20,7 @@ const __dirname = path.resolve();
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
 app.use('/api/auth', authRoutes);
+app.use('/api/posts', postRoutes);
 
 
 const connectDB = async () => {
