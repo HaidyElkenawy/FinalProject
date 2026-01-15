@@ -1,9 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './slices/authSlice';
+import postReducer from './slices/postSlice';
+
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
-    // Future features like posts and notifications will be added here [cite: 41, 75]
+    posts: postReducer,
+   
   },
 });

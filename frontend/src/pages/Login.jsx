@@ -15,6 +15,9 @@ const Login = () => {
   const { loading, error, user } = useSelector((state) => state.auth);
 
   useEffect(() => {
+    if (user) {
+      navigate('/feed'); 
+    }
     return () => {
       dispatch(clearError());
     };
