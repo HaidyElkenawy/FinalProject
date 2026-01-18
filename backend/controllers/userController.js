@@ -1,5 +1,6 @@
 import User from "../models/User.js";
-import bcrypt from "bcrypt"; // <--- 1. IMPORT THIS
+import bcrypt from "bcrypt"; 
+import Post from "../models/Post.js"; 
 
 export const updateUser = async (req, res) => {
   if (req.user.id !== req.params.id) {
@@ -48,6 +49,26 @@ export const getUser = async (req, res) => {
   } catch (error) {
     //console.error("Error in getUser:", error); 
     res.status(500).json({ error: error.message });
+  }
+};
+
+
+export const searchAll = async (req, res) => {
+  try {
+    const query = req.query.searchtext; 
+    
+    if (!query) return res.status(400).json({ message: "Search query is required" });
+    const users = await User.find({ 
+      username: { $regex: query, $options: "i" } 
+    }).select("username profilePicture");
+
+    const posts = await Post.find({ 
+      desc: { $regex: query, $options: "i" } 
+    }).populate("userId", "username profilePicture");
+
+    res.status(200).json({ users, posts });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
