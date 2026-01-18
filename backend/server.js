@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import authRoutes from './routes/authRoutes.js';
 import postRoutes from './routes/postRoutes.js';
-
+import userRoutes from './routes/userRoutes.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -12,7 +12,6 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
 app.use(cors()); // Allows frontend (port 5173) to talk to backend (port 5000)
 app.use(express.json()); 
 
@@ -21,6 +20,7 @@ app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
+app.use('/api/users', userRoutes);
 
 
 const connectDB = async () => {

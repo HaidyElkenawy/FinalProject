@@ -225,3 +225,16 @@
   color: #d32f2f; 
   background-color: transparent; 
 }
+
+.username-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.username-link:hover .username {
+  text-decoration: underline; 
+  cursor: pointer;
+}
+.user-info a {
+  display: flex; 
+}

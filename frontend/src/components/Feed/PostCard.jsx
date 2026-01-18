@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom'; // <--- 1. Import Link
 import API from '../../api/axios'; 
 import { 
   updatePostLikes, 
@@ -13,7 +14,6 @@ const PostCard = ({ post }) => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   
-  // Local UI State
   const [commentText, setCommentText] = useState('');
   const [showComments, setShowComments] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -21,6 +21,8 @@ const PostCard = ({ post }) => {
 
   const isLiked = post.likes.includes(user?.id);
   const isOwner = post.userId?._id === user?.id;
+  
+  const postOwnerId = post.userId?._id || post.userId;
 
   const handleLike = async () => {
     try {
@@ -43,6 +45,7 @@ const PostCard = ({ post }) => {
       console.error("Failed to add comment", err);
     }
   };
+
   const handleDeleteComment = async (commentId) => {
     if (!window.confirm("Delete this comment?")) return;
 
@@ -81,28 +84,36 @@ const PostCard = ({ post }) => {
   };
 
   const getProfileUrl = (user) => {
-  if (!user || !user.profilePicture) {
-    return "https://cdn-icons-png.flaticon.com/512/149/149071.png"; // Default
-  }
-  
- 
-  const cleanPath = user.profilePicture.replace(/\\/g, "/");
-  return `http://localhost:5000/${cleanPath}`;
-};
+    if (!user || !user.profilePicture) {
+      return "https://cdn-icons-png.flaticon.com/512/149/149071.png"; // Default
+    }
+    const cleanPath = user.profilePicture.replace(/\\/g, "/");
+    return `http://localhost:5000/${cleanPath}`;
+  };
 
   return (
     <div className="post-card">
       <div className="post-header">
         <div className="user-info">
-          <img 
-            src={getProfileUrl(post.userId)} 
-            alt="User" 
-            className="post-avatar"
-            onError={(e) => { e.target.src = "https://cdn-icons-png.flaticon.com/512/149/149071.png"; }}
-          />
+          {/* 2. Wrap Avatar in Link */}
+          <Link to={`/profile/${postOwnerId}`}>
+            <img 
+              src={getProfileUrl(post.userId)} 
+              alt="User" 
+              className="post-avatar"
+              onError={(e) => { e.target.src = "https://cdn-icons-png.flaticon.com/512/149/149071.png"; }}
+            />
+          </Link>
+          
           <div>
-            <span className="username">{post.userId?.username || "Unknown User"}</span>
-            <span className="date">{new Date(post.createdAt).toLocaleDateString()}</span>
+            {/* 3. Wrap Username in Link */}
+            <Link to={`/profile/${postOwnerId}`} className="username-link">
+               <span className="username">{post.userId?.username || "Unknown User"}</span>
+            </Link>
+            {/* Display Date on a new line or block */}
+            <span className="date" style={{display: 'block', fontSize: '12px', color: '#888'}}>
+                {new Date(post.createdAt).toLocaleDateString()}
+            </span>
           </div>
         </div>
         
@@ -131,7 +142,14 @@ const PostCard = ({ post }) => {
           <p>{post.desc}</p>
         )}
 
-        {post.img && <img src={`http://localhost:5000/${post.img}`} alt="Post content" className="post-image" />}
+        {/* Added the replace logic here too for safer Windows path handling */}
+        {post.img && (
+            <img 
+                src={`http://localhost:5000/${post.img.replace(/\\/g, "/")}`} 
+                alt="Post content" 
+                className="post-image" 
+            />
+        )}
       </div>
 
       <div className="post-actions">
@@ -159,6 +177,7 @@ const PostCard = ({ post }) => {
             {post.comments.map((c, index) => (
               <div key={index} className="comment">
                 <div className="comment-content">
+                  {/* Optional: You could also Link the commenter's name here */}
                   <strong>{c.username}: </strong> {c.text}
                 </div>
                 

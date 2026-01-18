@@ -13,13 +13,10 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    // 1. Start Loading
     authStart: (state) => {
       state.loading = true;
       state.error = null;
     },
-    
-    // 2. Login/Register Success
     authSuccess: (state, action) => {
       state.loading = false;
       state.user = action.payload.user;
@@ -27,13 +24,11 @@ const authSlice = createSlice({
       state.error = null;
     },
 
-    // 3. Failure
     authFailure: (state, action) => {
       state.loading = false;
       state.error = action.payload;
     },
 
-    // 4. Logout
     logout: (state) => {
       state.user = null;
       state.token = null;
@@ -41,9 +36,14 @@ const authSlice = createSlice({
     },
     clearError: (state) => {
       state.error = null;
+    },
+
+    updateUserSuccess: (state, action) => {
+    state.user = action.payload;
+    localStorage.setItem('user', JSON.stringify(action.payload));
     }
   },
 });
 
-export const { authStart, authSuccess, authFailure, logout, clearError } = authSlice.actions;
+export const { authStart, authSuccess, authFailure, logout, clearError, updateUserSuccess } = authSlice.actions;
 export default authSlice.reducer;
