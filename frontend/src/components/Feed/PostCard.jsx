@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom'; // <--- 1. Import Link
+import { Link, useNavigate } from 'react-router-dom'; 
 import API from '../../api/axios'; 
 import { 
   updatePostLikes, 
@@ -12,8 +12,10 @@ import './PostCard.css';
 
 const PostCard = ({ post }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate(); 
   const { user } = useSelector((state) => state.auth);
   
+
   const [commentText, setCommentText] = useState('');
   const [showComments, setShowComments] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -21,7 +23,6 @@ const PostCard = ({ post }) => {
 
   const isLiked = post.likes.includes(user?.id);
   const isOwner = post.userId?._id === user?.id;
-  
   const postOwnerId = post.userId?._id || post.userId;
 
   const handleLike = async () => {
@@ -36,7 +37,6 @@ const PostCard = ({ post }) => {
   const handleComment = async (e) => {
     e.preventDefault();
     if (!commentText.trim()) return;
-
     try {
       const { data } = await API.post(`/posts/${post._id}/comment`, { text: commentText });
       dispatch(updatePostComments({ postId: post._id, comments: data }));
@@ -48,7 +48,6 @@ const PostCard = ({ post }) => {
 
   const handleDeleteComment = async (commentId) => {
     if (!window.confirm("Delete this comment?")) return;
-
     try {
       const { data } = await API.delete(`/posts/${post._id}/comment/${commentId}`);
       dispatch(updatePostComments({ postId: post._id, comments: data }));
@@ -59,7 +58,6 @@ const PostCard = ({ post }) => {
 
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this post?")) return;
-
     try {
       await API.delete(`/posts/${post._id}`);
       dispatch(removePost(post._id));
@@ -73,7 +71,6 @@ const PostCard = ({ post }) => {
       setIsEditing(false);
       return;
     }
-
     try {
       const { data } = await API.patch(`/posts/${post._id}`, { desc: editDesc });
       dispatch(updatePostInState(data));
@@ -83,19 +80,21 @@ const PostCard = ({ post }) => {
     }
   };
 
-  const getProfileUrl = (user) => {
-    if (!user || !user.profilePicture) {
-      return "https://cdn-icons-png.flaticon.com/512/149/149071.png"; // Default
+  const handlePostClick = () => {
+    if (!isEditing) {
+      navigate(`/post/${post._id}`);
     }
-    const cleanPath = user.profilePicture.replace(/\\/g, "/");
-    return `http://localhost:5000/${cleanPath}`;
+  };
+
+  const getProfileUrl = (user) => {
+    if (!user || !user.profilePicture) return "https://cdn-icons-png.flaticon.com/512/149/149071.png"; 
+    return `http://localhost:5000/${user.profilePicture.replace(/\\/g, "/")}`;
   };
 
   return (
     <div className="post-card">
       <div className="post-header">
         <div className="user-info">
-          {/* 2. Wrap Avatar in Link */}
           <Link to={`/profile/${postOwnerId}`}>
             <img 
               src={getProfileUrl(post.userId)} 
@@ -106,11 +105,9 @@ const PostCard = ({ post }) => {
           </Link>
           
           <div>
-            {/* 3. Wrap Username in Link */}
             <Link to={`/profile/${postOwnerId}`} className="username-link">
                <span className="username">{post.userId?.username || "Unknown User"}</span>
             </Link>
-            {/* Display Date on a new line or block */}
             <span className="date" style={{display: 'block', fontSize: '12px', color: '#888'}}>
                 {new Date(post.createdAt).toLocaleDateString()}
             </span>
@@ -127,9 +124,12 @@ const PostCard = ({ post }) => {
         )}
       </div>
 
-      <div className="post-content">
+      <div 
+        className={`post-content ${!isEditing ? 'clickable' : ''}`} 
+        onClick={handlePostClick}
+      >
         {isEditing ? (
-          <div className="edit-mode">
+          <div className="edit-mode" onClick={(e) => e.stopPropagation()}> 
             <textarea 
               value={editDesc} 
               onChange={(e) => setEditDesc(e.target.value)}
@@ -142,7 +142,6 @@ const PostCard = ({ post }) => {
           <p>{post.desc}</p>
         )}
 
-        {/* Added the replace logic here too for safer Windows path handling */}
         {post.img && (
             <img 
                 src={`http://localhost:5000/${post.img.replace(/\\/g, "/")}`} 
@@ -177,18 +176,13 @@ const PostCard = ({ post }) => {
             {post.comments.map((c, index) => (
               <div key={index} className="comment">
                 <div className="comment-content">
-                  {/* Optional: You could also Link the commenter's name here */}
                   <strong>{c.username}: </strong> {c.text}
                 </div>
-                
                 {(user?.id === c.userId || user?.id === post.userId._id) && (
                   <button 
                     className="delete-comment-btn" 
                     onClick={() => handleDeleteComment(c._id)}
-                    title="Delete Comment"
-                  >
-                    ✕
-                  </button>
+                  >✕</button>
                 )}
               </div>
             ))}

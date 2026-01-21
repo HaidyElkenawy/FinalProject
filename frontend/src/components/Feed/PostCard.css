@@ -238,3 +238,12 @@
 .user-info a {
   display: flex; 
 }
+
+.post-content.clickable {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.post-content.clickable:hover {
+  background-color: #fafafa; 
+}
