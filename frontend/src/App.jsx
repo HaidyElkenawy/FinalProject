@@ -3,6 +3,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Feed from './pages/Feed';
 import Profile from './pages/Profile';
+import PostPage from './pages/PostPage';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         
         <Route path="/feed" element={<Feed />} />
         <Route path="/profile/:userId" element={<Profile />} />
+        <Route path="/post/:postId" element={<PostPage />} />
       </Routes>
     </div>
   );

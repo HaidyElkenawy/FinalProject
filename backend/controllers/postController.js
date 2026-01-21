@@ -1,5 +1,6 @@
 import Post from '../models/Post.js';
 import User from '../models/User.js';
+import Notification from '../models/Notification.js';
 
 export const createPost = async (req, res) => {
   try {
@@ -147,6 +148,15 @@ export const likePost = async (req, res) => {
    
       await post.updateOne({ $push: { likes: userId } });
       res.status(200).json({ id, userId, liked: true, message: "Post liked" });
+
+      if (post.userId.toString() !== userId) {
+        await Notification.create({
+            userId: post.userId, // The Post Owner receives it
+            senderId: userId,    //sent it
+            type: "like",
+            postId: post._id
+        });
+      }
     }
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -155,8 +165,9 @@ export const likePost = async (req, res) => {
 
 export const addComment = async (req, res) => {
   try {
-    const { id } = req.params; // Post ID
+    const { id } = req.params; 
     const { text } = req.body;
+    
     const user = await User.findById(req.user.id);
 
     const newComment = {
@@ -168,10 +179,18 @@ export const addComment = async (req, res) => {
     };
 
     const post = await Post.findById(id);
+    
     post.comments.push(newComment);
     await post.save();
 
-   
+    if (post.userId.toString() !== req.user.id) {
+      await Notification.create({
+        userId: post.userId, 
+        senderId: req.user.id,
+        type: "comment",
+        postId: post._id
+      });
+    }
     res.status(201).json(post.comments);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -199,5 +218,16 @@ export const deleteComment = async (req, res) => {
     res.status(200).json(post.comments);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+
+export const getPost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const post = await Post.findById(id).populate("userId", "username profilePicture");
+    res.status(200).json(post);
+  } catch (err) {
+    res.status(404).json({ message: "Post not found" });
   }
 };
