@@ -1,22 +1,27 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useSelector} from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import API from '../api/axios';
 import Navbar from '../components/Navbar';
 import PostCard from '../components/Feed/PostCard';
 import './Profile.css';
 import EditProfileModal from '../components/EditProfileModal';
+import { setPosts } from '../store/slices/postSlice';
 
 const Profile = () => {
   const { userId } = useParams(); 
+  const dispatch = useDispatch();
   const { user: currentUser } = useSelector((state) => state.auth);
-  
+  const { posts } = useSelector((state) => state.posts); 
+  const userPosts = Array.isArray(posts) ? posts : [];
+  console.log("RENDER -> UserPosts Length:", userPosts.length);
+
   const [userProfile, setUserProfile] = useState(null);
-  const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
 
   const currentUserId = currentUser?._id || currentUser?.id;
+  
   const getImageUrl = (path) => {
     if (!path) return "https://cdn-icons-png.flaticon.com/512/149/149071.png";
     return `http://localhost:5000/${path.replace(/\\/g, "/")}`;
@@ -29,11 +34,14 @@ const Profile = () => {
         const userRes = await API.get(`/users/${userId}`);
         setUserProfile(userRes.data);
         const postsRes = await API.get(`/posts/user/${userId}`);
-        if (postsRes.data.posts) {
-            setUserPosts(postsRes.data.posts);
-        } else {
-            setUserPosts(postsRes.data);
+        
+        let fetchedPosts = [];
+        if (postsRes.data && Array.isArray(postsRes.data.posts)) {
+            fetchedPosts = postsRes.data.posts;
+        } else if (Array.isArray(postsRes.data)) {
+            fetchedPosts = postsRes.data;
         }
+        dispatch(setPosts(fetchedPosts));
         
       } catch (err) {
         console.error("Failed to fetch profile", err);
@@ -42,8 +50,10 @@ const Profile = () => {
       }
     };
 
-    fetchProfileData();
-  }, [userId]);
+    if (userId) {
+        fetchProfileData();
+    }
+  }, [userId, dispatch]);
 
   if (loading) return <div style={{textAlign: 'center', marginTop: '50px'}}>Loading Profile...</div>;
   if (!userProfile) return <div style={{textAlign: 'center', marginTop: '50px'}}>User not found</div>;
@@ -70,7 +80,6 @@ const Profile = () => {
             />
             <div className="profile-text">
               <h2>{userProfile.username}</h2>
-              <p className="bio">{userProfile.bio || "No bio available"}</p>
               <div className="stats">
                 <span><strong>{userPosts.length}</strong> Posts</span>
                 <span><strong>{userProfile.friends?.length || 0}</strong> Friends</span>
@@ -94,7 +103,7 @@ const Profile = () => {
             <p style={{textAlign: 'center', color: '#888'}}>No posts yet.</p>
           ) : (
             userPosts.map((post) => (
-              <PostCard key={post._id} post={post} />
+              <PostCard key={post._id || Math.random()} post={post} />
             ))
           )}
         </div>

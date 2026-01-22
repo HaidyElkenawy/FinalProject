@@ -19,9 +19,15 @@ const postSlice = createSlice({
     },
 
    
-    setPosts: (state, action) => {
+   setPosts: (state, action) => {
       state.loading = false;
-      state.posts = action.payload.posts;
+      if (Array.isArray(action.payload)) {
+          state.posts = action.payload; 
+      } else if (action.payload.posts) {
+          state.posts = action.payload.posts;
+      } else {
+          state.posts = [];
+      }
     },
 
   

@@ -6,8 +6,7 @@ import './EditProfileModal.css';
 
 const EditProfileModal = ({ user, onClose, onUpdate }) => {
   const [username, setUsername] = useState(user.username);
-  const [bio, setBio] = useState(user.bio || '');
-  const [password, setPassword] = useState(''); // <--- 1. New State for Password
+  const [password, setPassword] = useState(''); 
   
   const [profilePicture, setProfilePicture] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -29,7 +28,6 @@ const EditProfileModal = ({ user, onClose, onUpdate }) => {
 
     const formData = new FormData();
     formData.append('username', username);
-    formData.append('bio', bio);
     
     if (password) {
       formData.append('password', password);
@@ -83,15 +81,6 @@ const EditProfileModal = ({ user, onClose, onUpdate }) => {
             />
           </div>
           
-          <div className="form-group">
-            <label>Bio</label>
-            <textarea 
-              value={bio} 
-              onChange={(e) => setBio(e.target.value)} 
-              rows="3"
-            />
-          </div>
-
           <div className="form-group">
             <label>New Password</label>
             <input 
