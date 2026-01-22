@@ -78,3 +78,146 @@
   object-fit: cover;
   border: 1px solid var(--border-color);
 }
+
+
+.create-post-card {
+    width: 100%;
+    border-radius: 10px;
+    background-color: white;
+    box-shadow: 0px 0px 16px -8px rgba(0, 0, 0, 0.68);
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.cp-top {
+    display: flex;
+    align-items: center;
+}
+
+.cp-profile-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+}
+
+.cp-input {
+    border: none;
+    width: 80%;
+    outline: none;
+    font-size: 1rem;
+}
+
+.cp-hr {
+    margin: 15px 0;
+    border: none;
+    height: 1px;
+    background-color: #eee;
+}
+
+.cp-preview-container {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+}
+
+.cp-img-preview {
+    height: 100px;
+    border-radius: 5px;
+    object-fit: cover;
+}
+
+.cp-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cp-option {
+    display: flex;
+    align-items: center;
+    margin-right: 15px;
+    cursor: pointer;
+}
+
+.cp-icon {
+    font-size: 1.2rem;
+    margin-right: 5px;
+}
+
+.cp-text {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.cp-button {
+    border: none;
+    padding: 7px 15px;
+    border-radius: 5px;
+    background-color: var(--primary-brown);
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+
+.edit-images-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.edit-img-wrapper {
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.edit-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+}
+.edit-img-wrapper.new img {
+    border: 2px solid #4CAF50;
+}
+
+.remove-img-btn {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: red;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.edit-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.add-photo-btn {
+    background-color: #eee;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.add-photo-btn:hover {
+    background-color: #ddd;
+}

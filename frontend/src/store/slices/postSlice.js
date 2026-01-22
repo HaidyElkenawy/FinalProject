@@ -8,7 +8,7 @@ const postSlice = createSlice({
     error: null,
   },
   reducers: {
-    // 1. Loading State Handlers
+   
     startLoading: (state) => {
       state.loading = true;
       state.error = null;
@@ -18,18 +18,18 @@ const postSlice = createSlice({
       state.error = action.payload;
     },
 
-    // 2. Fetch Posts Success
+   
     setPosts: (state, action) => {
       state.loading = false;
-      state.posts = action.payload.posts; // Assuming payload is { posts: [...] }
+      state.posts = action.payload.posts;
     },
 
-    // 3. Create Post Success
+  
     addPost: (state, action) => {
       state.posts.unshift(action.payload);
     },
 
-    // 4. Like Post Success
+   
     updatePostLikes: (state, action) => {
       const { id, userId, liked } = action.payload;
       const post = state.posts.find((p) => p._id === id);
@@ -41,8 +41,6 @@ const postSlice = createSlice({
         }
       }
     },
-
-    // 5. Update Comments (Add or Delete)
     updatePostComments: (state, action) => {
       const { postId, comments } = action.payload;
       const post = state.posts.find((p) => p._id === postId);
@@ -51,14 +49,12 @@ const postSlice = createSlice({
       }
     },
 
-    // 6. Delete Post Success
     removePost: (state, action) => {
       state.posts = state.posts.filter((p) => p._id !== action.payload);
     },
 
-    // 7. Update Post Text Success
     updatePostInState: (state, action) => {
-      const index = state.posts.findIndex((p) => p._id === action.payload._id);
+      const index = state.posts.findIndex((post) => post._id === action.payload._id);
       if (index !== -1) {
         state.posts[index] = action.payload;
       }

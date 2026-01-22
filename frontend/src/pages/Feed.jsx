@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import API from '../api/axios'; 
-import { startLoading, setPosts, hasError } from '../store/slices/postSlice';
+import { startLoading, setPosts, hasError } from '../store/slices/postSlice'; 
 import CreatePost from '../components/Feed/CreatePost';
 import PostCard from '../components/Feed/PostCard';
 import Navbar from '../components/Navbar';
@@ -28,17 +28,20 @@ const Feed = () => {
     <div className="feed-container">
         <Navbar /> 
         
-        <div className="feed-content" style={{ maxWidth: '800px', margin: '0 auto', paddingBottom: '20px' }}>
+        <div className="feed-content" style={{ maxWidth: '600px', margin: '20px auto' }}>
             <CreatePost />
             
-            {loading && <p style={{textAlign: 'center'}}>Loading posts...</p>}
-            {error && <p style={{color: 'red', textAlign: 'center'}}>{error}</p>}
+            {loading && <p style={{textAlign: 'center', marginTop: '20px'}}>Loading posts...</p>}
             
-            <div className="posts-list">
-                {posts.map((post) => (
-                    <PostCard key={post._id} post={post} />
-                ))}
-            </div>
+            {error && <p style={{color: 'red', textAlign: 'center', marginTop: '20px'}}>{error}</p>}
+            
+            {!loading && !error && (
+              <div className="posts-list" style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {posts.map((post) => (
+                      <PostCard key={post._id} post={post} />
+                  ))}
+              </div>
+            )}
         </div>
     </div>
   );

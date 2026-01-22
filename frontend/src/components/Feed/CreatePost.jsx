@@ -1,69 +1,96 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import API from '../../api/axios'; 
-import { addPost } from '../../store/slices/postSlice'; 
-import './CreatePost.css';
+import { addPost } from '../../store/slices/postSlice';
+import API from '../../api/axios';
+import './CreatePost.css'; 
 
 const CreatePost = () => {
-  const [desc, setDesc] = useState('');
-  const [image, setImage] = useState(null);
-  const { user } = useSelector((state) => state.auth);
+  const [desc, setDesc] = useState("");
+  const [files, setFiles] = useState([]); 
   const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+
+  const handleFileChange = (e) => {
+    setFiles(Array.from(e.target.files));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!desc && !image) return;
+    if (!desc && files.length === 0) return;
 
-    const formData = new FormData();
-    formData.append('desc', desc);
-    if (image) {
-      formData.append('picture', image);
+    const newPostData = new FormData();
+    newPostData.append("desc", desc);
+    
+    if (files.length > 0) {
+        files.forEach((file) => {
+            newPostData.append("files", file); 
+        });
     }
 
     try {
-      const config = { headers: { 'Content-Type': 'multipart/form-data' } };
-      const { data } = await API.post('/posts', formData, config);
-      dispatch(addPost(data));
-      setDesc('');
-      setImage(null);
-    } catch (error) {
-      console.error("Failed to create post:", error);
+      const { data } = await API.post("/posts", newPostData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      dispatch(addPost(data)); 
+      setDesc("");
+      setFiles([]); 
+    } catch (err) {
+      console.error("Failed to create post", err);
     }
   };
 
+  const getProfileUrl = (path) => {
+    if (!path) return "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+    return `http://localhost:5000/${path.replace(/\\/g, "/")}`;
+  };
 
-  const getProfileUrl = (user) => {
-  if (!user || !user.profilePicture) return "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-  const cleanPath = user.profilePicture.replace(/\\/g, "/");
-  return `http://localhost:5000/${cleanPath}`;
-};
   return (
-    <div className="create-post-container">
-      <div className="create-post-header">
-        <img 
-          src={getProfileUrl(user)} 
-          alt="Profile" 
-          className="avatar" 
+    <div className="create-post-card">
+      <div className="cp-top">
+        <img
+          className="cp-profile-img"
+          src={getProfileUrl(user?.profilePicture)}
+          alt="Profile"
         />
-        <input 
-          type="text" 
+        <input
           placeholder={`What's on your mind, ${user?.username}?`}
+          className="cp-input"
           value={desc}
           onChange={(e) => setDesc(e.target.value)}
         />
       </div>
-      <div className="create-post-actions">
-        <input 
-          type="file" 
-          id="fileInput" 
-          style={{ display: 'none' }}
-          onChange={(e) => setImage(e.target.files[0])} 
-        />
-        <label htmlFor="fileInput" className="image-btn">
-          📷 {image ? "Image Selected" : "Add Image"}
+      
+      <hr className="cp-hr" />
+
+      {files.length > 0 && (
+         <div className="cp-preview-container">
+            {files.map((file, index) => (
+                <div key={index} className="cp-preview-wrapper">
+                    <img 
+                        className="cp-img-preview" 
+                        src={URL.createObjectURL(file)} 
+                        alt="preview" 
+                    />
+                </div>
+            ))}
+         </div>
+      )}
+
+      <form className="cp-bottom" onSubmit={handleSubmit}>
+        <label htmlFor="file-upload" className="cp-option">
+          <span className="cp-icon">📷</span>
+          <span className="cp-text">Photo/Video</span>
+          <input
+            style={{ display: "none" }}
+            type="file"
+            id="file-upload"
+            multiple
+            accept=".png,.jpeg,.jpg"
+            onChange={handleFileChange}
+          />
         </label>
-        <button onClick={handleSubmit} className="post-btn">Post</button>
-      </div>
+        <button className="cp-button" type="submit">Share</button>
+      </form>
     </div>
   );
 };

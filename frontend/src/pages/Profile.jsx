@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector} from 'react-redux';
 import API from '../api/axios';
 import Navbar from '../components/Navbar';
 import PostCard from '../components/Feed/PostCard';

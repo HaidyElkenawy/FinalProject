@@ -17,9 +17,9 @@ const router = express.Router();
 router.get('/user/:userId', verifyToken, getUserPosts); 
 router.get('/', verifyToken, getFeedPosts);       
 
-router.post('/', verifyToken, upload.single('picture'), createPost);
+router.post("/", verifyToken, upload.array("files", 5), createPost);
 
-router.patch('/:id', verifyToken, updatePost);         
+router.patch('/:id', verifyToken, upload.array("files", 5), updatePost);        
 router.patch('/:id/like', verifyToken, likePost);      
 router.post('/:id/comment', verifyToken, addComment); 
 router.delete('/:id', verifyToken, deletePost);   
